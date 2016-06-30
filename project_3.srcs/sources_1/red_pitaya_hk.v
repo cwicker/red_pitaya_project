@@ -22,10 +22,18 @@
  *
  * This module takes care of system identification via DNA readout at startup and
  * ID register which user can define at compile time.
+ * 
+ 
+ 
+ * What is DNA? What is system identification? 
+ * What is ID register? 
  *
+ 
  * Beside that it is currently also used to test expansion connector and for
  * driving LEDs.
  * 
+ 
+ * What is expansion connector? 
  */
 
 
@@ -33,10 +41,13 @@
 
 
 module red_pitaya_hk
+* Module definition is pretty standard in beginning verilog code. Defines a "new circuit." 
+
 (
    // LED
    output     [  8-1: 0] led_o           ,  //!< LED output
-
+   * Defines an output port of the circuit as an "LED" with a bus width of 8. i. e. 8 LEDs
+   
    // Expansion connector
    input      [  8-1: 0] exp_p_dat_i     ,  //!< exp. con. input data
    output reg [  8-1: 0] exp_p_dat_o     ,  //!< exp. con. output data
