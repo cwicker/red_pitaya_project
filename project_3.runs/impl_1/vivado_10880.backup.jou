@@ -1,0 +1,10 @@
+#-----------------------------------------------------------
+# Vivado v2014.1 (64-bit)
+# SW Build 881834 on Fri Apr  4 14:15:54 MDT 2014
+# IP Build 877625 on Fri Mar 28 16:29:15 MDT 2014
+# Start of session at: Tue Jun 28 13:34:40 2016
+# Process ID: 9560
+# Log file: C:/Users/Christina/Documents/UROP/FPGAs/red_pitaya_fpga_blink_example/project_3/project_3.runs/impl_1/red_pitaya_top.vdi
+# Journal file: C:/Users/Christina/Documents/UROP/FPGAs/red_pitaya_fpga_blink_example/project_3/project_3.runs/impl_1\vivado.jou
+#-----------------------------------------------------------
+source red_pitaya_top.tcl -notrace
