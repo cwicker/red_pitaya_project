@@ -75,11 +75,15 @@ module red_pitaya_hk
 
 //---------------------------------------------------------------------------------
 //
-//  Simple LED logic
-
 reg [8-1:0] led_reg;
-
-assign led_o = led_reg;
+reg [25:0] led_counter;
+always @(posedge sys_clk_i) begin
+   if (!sys_rstn_i) begin led_counter <= 26'h0; 
+   end 
+   else begin led_counter <= led_counter + 26'h1; 
+   end 
+end 
+assign led_o = {led_reg[7:4],led_counter[25],led_reg[2:0]};
 
 
 
