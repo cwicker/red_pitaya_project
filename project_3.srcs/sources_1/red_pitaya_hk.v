@@ -23,7 +23,7 @@
  * This module takes care of system identification via DNA readout at startup and
  * ID register which user can define at compile time.
  * 
- 
+ ** -- I think that we are going to want to have the DNA readout stuff in our filter**
  
  * What is DNA? What is system identification? 
  * What is ID register? 
@@ -31,9 +31,10 @@
  
  * Beside that it is currently also used to test expansion connector and for
  * driving LEDs.
+ 
  * 
  
- * What is expansion connector? 
+ * What is expansion connector? Need to understand where that is done in the code...
  */
 
 
