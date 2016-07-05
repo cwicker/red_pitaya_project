@@ -129,7 +129,8 @@ always @(posedge sys_clk_i) begin --> The clock signal is an oscillating square 
    
    end 
    else begin led_counter <= led_counter + 26'h1; --> This time does something if there is a reset signal. Want to find where the
-   // reset signal is being set. takes the 26 bit value of led_counter and adds 1 like: led_counter + 00000000000000000000000001
+   // reset signal is being set. takes the 26 bit value of led_counter and adds 1 like: led_counter + 00000000000000000000000001. Not
+   // sure wether '<=' meas less than or equal to or means store that value
    end 
 end 
 
@@ -142,38 +143,54 @@ assign led_o = {led_reg[7:4],led_counter[25],led_reg[2:0]}; // led_o  probably m
 
 //---------------------------------------------------------------------------------
 //
-//  Read device DNA
+//  Read device DNA --> Why is it necessary to read the device DNA? 
 
-wire           dna_dout  ;
-reg            dna_clk   ;
-reg            dna_read  ;
-reg            dna_shift ;
-reg  [ 9-1: 0] dna_cnt   ;
-reg  [57-1: 0] dna_value ;
-reg            dna_done  ;
+wire           dna_dout  ; --> not really sure what this is...
+reg            dna_clk   ; --> I'm also guessing just defining another clock cycle for whatever operations are to be performed. Why 
+//not use the bus clock?
 
-always @(posedge sys_clk_i) begin
-   if (sys_rstn_i == 1'b0) begin
-      dna_clk   <=  1'b0 ;
-      dna_read  <=  1'b0 ;
-      dna_shift <=  1'b0 ;
-      dna_cnt   <=  9'd0 ;
-      dna_value <= 57'd0 ;
-      dna_done  <=  1'b0 ;
+reg            dna_read  ; --> Some value probably related to read enabling the device Dna
+
+reg            dna_shift ; --> Shift register maybe? (A register that allows the contents to be moved to the left or right, like if you
+// wanted to multiply or divide by 2 for your binary number)
+
+reg  [ 9-1: 0] dna_cnt   ; --> some 9 bit counter variable for the DNA
+
+reg  [57-1: 0] dna_value ; --> the 57 bit DNA value
+reg            dna_done  ; --> Some value probably also used in a conditional statement to determine when your done processing the DNA
+
+always @(posedge sys_clk_i) begin // always do something on the rising clock edge. Why are we using the system clock and not the
+// dna_clock
+
+   if (sys_rstn_i == 1'b0) begin // if the reset signal equals zero this time. This is happens in addition to storing 26'h0 in 
+   // led_counter. So everytime there isn't a reset signal the value zero is stored in led_counter and something related to reading the
+   // device DNA happens. 
+   
+      dna_clk   <=  1'b0 ; // set the dna_clock to the same value of the sys_clk_i
+      dna_read  <=  1'b0 ; // set dna_read to 1 
+      dna_shift <=  1'b0 ; // set dna_shift to 1 --> not really sure if dna_shift is some serial input to a shift register or the
+      // 'advance' signal, or the signal for the register to perform the shift
+      dna_cnt   <=  9'd0 ; // --> set all of the bits i dna_count to 0
+      dna_value <= 57'd0 ; // --> dna_value is originally set to 57 bits of 0
+      dna_done  <=  1'b0 ; // --> dna_done is set to 1
+      
    end
    else begin
-      if (!dna_done)
-         dna_cnt <= dna_cnt + 1'd1 ;
+      if (!dna_done) // if dna_done ==0
+         dna_cnt <= dna_cnt + 1'd1 ; // increase dna-count by 1
 
-      dna_clk <= dna_cnt[2] ;
-      dna_read  <= (dna_cnt < 9'd10);
-      dna_shift <= (dna_cnt > 9'd18);
+      dna_clk <= dna_cnt[2] ; // set dna_clock now to the third bit of dna_count. If there is no reset signal then set dna_clock to
+      // the same as system clock, otherwise clock it to oscillations of the third bit of dna_cnt (assuming dna_done is equal to 0). 
+      
+      dna_read  <= (dna_cnt < 9'd10); // if dna_cnt is less than 10, store a 1 in dna_read 
+      dna_shift <= (dna_cnt > 9'd18); // if dna_cnt is greater than 18, store a 1 in dna_shift
 
-      if ((dna_cnt[2:0]==3'h0) && !dna_done)
-         dna_value <= {dna_value[57-2:0], dna_dout};
+      if ((dna_cnt[2:0]==3'h0) && !dna_done) // if the first 3 bits of dna_cnt are equal to 000, and dna_done is equal to 0 
+         dna_value <= {dna_value[57-2:0], dna_dout}; // assign the higher 54 bits of dna_value to dna_value, and then put dna_dout as
+         // the remaining 3 bits
 
-      if (dna_cnt > 9'd465)
-         dna_done <= 1'b1;
+      if (dna_cnt > 9'd465) // if dna_cnt > 111010001
+         dna_done <= 1'b1; // assign 1 to dna_done
 
    end
 end
