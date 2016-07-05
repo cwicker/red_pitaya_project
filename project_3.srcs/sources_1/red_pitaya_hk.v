@@ -41,42 +41,69 @@
 
 
 module red_pitaya_hk
-* Module definition is pretty standard in beginning verilog code. Defines a "new circuit." 
+/* Module definition is pretty standard in beginning verilog code. Defines a "new circuit." */
 
 (
    // LED
    output     [  8-1: 0] led_o           ,  //!< LED output
-   * Defines an output port of the circuit as an "LED" with a bus width of 8. i. e. 8 LEDs
+   // Defines an output port of the circuit as an "LED" with a bus width of 8. i. e. 8 LEDs
    
-   // Expansion connector
-   input      [  8-1: 0] exp_p_dat_i     ,  //!< exp. con. input data
-   output reg [  8-1: 0] exp_p_dat_o     ,  //!< exp. con. output data
-   output reg [  8-1: 0] exp_p_dir_o     ,  //!< exp. con. 1-output enable
-   input      [  8-1: 0] exp_n_dat_i     ,  //!<
-   output reg [  8-1: 0] exp_n_dat_o     ,  //!<
-   output reg [  8-1: 0] exp_n_dir_o     ,  //!<
+   
+   // Expansion connector -- an expansion connector allows for more ports to be created and allows for different devices specified by
+   // the user to be attached
+   input      [  8-1: 0] exp_p_dat_i     ,  //!< exp. con. input data --> Define an input register with a bus width of 8. 'exp' for
+   //expansion connector, and 'i' for input. Don't know what the 'p' stands for. 
+   
+   output reg [  8-1: 0] exp_p_dat_o     ,  //!< exp. con. output data --> Define the corresponding output register with same width
+   
+   output reg [  8-1: 0] exp_p_dir_o     ,  //!< exp. con. 1-output enable --> What is the difference between the 'dir' and 'dat'
+   // registers? I think that 'dat' stands for data....
+   
+   input      [  8-1: 0] exp_n_dat_i     ,  //!< Another input register
+   output reg [  8-1: 0] exp_n_dat_o     ,  //!< Another output register
+   output reg [  8-1: 0] exp_n_dir_o     ,  //!< Another output register
 
-   // XADC
-   input      [ 12-1: 0] adc_v_i         ,  //!< measured temperatures and voltage supplies
-   input      [ 12-1: 0] adc_temp_i      ,
-   input      [ 12-1: 0] adc_pint_i      ,
-   input      [ 12-1: 0] adc_paux_i      ,
-   input      [ 12-1: 0] adc_bram_i      ,
+   // XADC -- analog to digital converters. I think this is storing information about the analog to digital converters? 
+   input      [ 12-1: 0] adc_v_i         ,  //!< measured temperatures and voltage supplies Voltage of ADC? 
+   input      [ 12-1: 0] adc_temp_i      , // Temperature of ADC?
+   input      [ 12-1: 0] adc_pint_i      , // not really sure what the rest of these register definitions are referring to with regard
+   // to ADCs... They all seem to be input registers though. 
+   input      [ 12-1: 0] adc_paux_i      , 
+   input      [ 12-1: 0] adc_bram_i      , 
    input      [ 12-1: 0] adc_int_i       ,
    input      [ 12-1: 0] adc_aux_i       ,
    input      [ 12-1: 0] adc_ddr_i       ,
 
-   // System bus
-   input                 sys_clk_i       ,  //!< bus clock
-   input                 sys_rstn_i      ,  //!< bus reset - active low
-   input      [ 32-1: 0] sys_addr_i      ,  //!< bus address
-   input      [ 32-1: 0] sys_wdata_i     ,  //!< bus write data
-   input      [  4-1: 0] sys_sel_i       ,  //!< bus write byte select
-   input                 sys_wen_i       ,  //!< bus write enable
-   input                 sys_ren_i       ,  //!< bus read enable
-   output reg [ 32-1: 0] sys_rdata_o     ,  //!< bus read data
-   output reg            sys_err_o       ,  //!< bus error indicator
-   output reg            sys_ack_o          //!< bus acknowledge signal
+   // System bus -- Not totally sure but I think buses are like highways connecting different serial communications. Generally I 
+   // think this refers to communication with everything on the chip. I imagine that
+   // the registers for the bus components defined below may possibly refer to variables that are constant throughout the chip
+   
+   input                 sys_clk_i       ,  //!< bus clock --> Define a register to store a clock signal
+   
+   input                 sys_rstn_i      ,  //!< bus reset - active low --> Define a register to store a reset signal. Not totally 
+   //sure what this would mean, but I would guess that if the reset signal changes it produces some sort of change in the system. i. e.
+   // there is a conditional statement based on the reset signal...
+   
+   input      [ 32-1: 0] sys_addr_i      ,  //!< bus address --> Not really sure about the bus address, but I think that this is a 
+   //register storing the value of the name of the memory location where some value is to be stored later on
+   
+   input      [ 32-1: 0] sys_wdata_i     ,  //!< bus write data --> register that stores the data that is going to be written to memory
+   
+   input      [  4-1: 0] sys_sel_i       ,  //!< bus write byte select --> register that is used to index which byte is written to 
+   // memory
+   
+   input                 sys_wen_i       ,  //!< bus write enable --> you can only write to memory based on whether the value of this 
+   // register is a 0 or 1. There is probably another conditional statement based on this register value. It can be viewed as
+   // controlling a switch
+   
+   input                 sys_ren_i       ,  //!< bus read enable --> based on the value of this one bit register, you can determine 
+   // whether you are allowed to read the data from memory
+   
+   output reg [ 32-1: 0] sys_rdata_o     ,  //!< bus read data --> Register storing the data that is read from memory. 
+   
+   output reg            sys_err_o       ,  //!< bus error indicator --> based on the value of this register we can tell whether some 
+   // error occurred in the bus
+   output reg            sys_ack_o          //!< bus acknowledge signal --> Not really sure what this register does. 
 
 );
 
@@ -86,15 +113,28 @@ module red_pitaya_hk
 
 //---------------------------------------------------------------------------------
 //
-reg [8-1:0] led_reg;
-reg [25:0] led_counter;
-always @(posedge sys_clk_i) begin
-   if (!sys_rstn_i) begin led_counter <= 26'h0; 
+reg [8-1:0] led_reg;  --> Define the registers corresponding to the LEDs
+
+reg [25:0] led_counter; --> Define some LED counter variable that is 26 bits long. 
+
+always @(posedge sys_clk_i) begin --> The clock signal is an oscillating square wave. At alternating ticks in time the clock releases 
+// either a 0 or a 1. This statement basically says, at each rising edge of the square wave, "do something."
+
+   if (!sys_rstn_i) begin led_counter <= 26'h0; // 'if sys_rstn_i' is saying 'if sys_rstn_i==1.' 'if (!sys_rstn_i)' is saying 
+   // 'if sys_rstn_i does not equal 1' (If there is no reset signal)
+   // start each of these loops by storing the value 26'h0 in the led_counter variable
+   // stores the value 000000000000000000000000000 in led_counter
+   // A useful link on how numbers are read in verilog:
+   // http://web.engr.oregonstate.edu/~traylor/ece474/lecture_verilog/beamer/verilog_number_literals.pdf
+   
    end 
-   else begin led_counter <= led_counter + 26'h1; 
+   else begin led_counter <= led_counter + 26'h1; --> This time does something if there is a reset signal. Want to find where the
+   // reset signal is being set. takes the 26 bit value of led_counter and adds 1 like: led_counter + 00000000000000000000000001
    end 
 end 
-assign led_o = {led_reg[7:4],led_counter[25],led_reg[2:0]};
+
+assign led_o = {led_reg[7:4],led_counter[25],led_reg[2:0]}; // led_o  probably means 'LED output.' This is the 8 bit wide register 
+// storing the output led voltage level. It looks like it assigns the high order bit of led_counter to the 3rd LED. 
 
 
 
