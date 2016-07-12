@@ -8,7 +8,9 @@
 # (c) Red Pitaya  http://www.redpitaya.com
 #
 
-
+# Not really sure if this is one of the "xml" type files that the guy references on the forum or not. However, it looks like it 
+# specifies component types and links them to ports -- i.e. the names that we would give things like the LED's if we want to specify 
+# the LEDs. 
 ############################################################################
 # IO constraints                                                           #
 ############################################################################
